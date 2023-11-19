@@ -5,15 +5,30 @@ import logging
 import math
 import random
 
-def add_random_offset(value, offset_range=0.0001):
+# Global cache dictionary
+coordinates_cache = {}
+
+
+def add_random_offset(value, offset_range=0.001):
     return value + random.uniform(-offset_range, offset_range)
 
 def get_coordinates_by_postcode(country_code, postcode):
+    # Create a unique key for each country code and postcode combination
+    cache_key = f"{country_code}_{postcode}"
+
+    # Check if the coordinates are already in the cache
+    if cache_key in coordinates_cache:
+        return coordinates_cache[cache_key]
+
+    # Perform geolocation lookup
     geolocator = pgeocode.Nominatim(country_code)
     location = geolocator.query_postal_code(postcode)
     if math.isnan(location.latitude) or math.isnan(location.longitude):
         logging.warning(f"Unable to find coordinates for country code {country_code} and postcode {postcode}")
         return None
+
+    # Store the coordinates in the cache
+    coordinates_cache[cache_key] = (location.latitude, location.longitude)
     return location.latitude, location.longitude
 
 def generate_map_html():
