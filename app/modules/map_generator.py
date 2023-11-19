@@ -3,6 +3,10 @@ import csv
 import os
 import logging
 import math
+import random
+
+def add_random_offset(value, offset_range=0.0001):
+    return value + random.uniform(-offset_range, offset_range)
 
 def get_coordinates_by_postcode(country_code, postcode):
     geolocator = pgeocode.Nominatim(country_code)
@@ -35,7 +39,10 @@ def generate_map_html():
     for country, postcode, label in data:
         coords = get_coordinates_by_postcode(country, postcode)
         if coords:  # Check if the coordinates are not None
-            locations.append((coords, label))
+            # Apply a random offset to each coordinate
+            lat_offset = add_random_offset(coords[0])
+            lon_offset = add_random_offset(coords[1])
+            locations.append(((lat_offset, lon_offset), label))
 
     # Generate markers
     markers = ""
